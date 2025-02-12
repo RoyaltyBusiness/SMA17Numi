@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +17,9 @@ using UnityEngine.Assertions;
 using VehicleFramework.Assets;
 using AircraftLib;
 using VehicleFramework.Engines;
+using AircraftLib.Engines;
+using AircraftLib.VehicleTypes;
+using AircraftLib.Managers;
 
 namespace SMA17Numi
 {
@@ -170,16 +173,16 @@ namespace SMA17Numi
             get
             {
                 var list = new List<GameObject>();
-                list.Add(transform.Find("Model/Canopy").gameObject);
+                //list.Add(transform.Find("Model/Canopy").gameObject);
                 return list;
             }
         }
 
-        public override GameObject BoundingBox
+        public override BoxCollider BoundingBoxCollider
         {
             get
             {
-                return transform.Find("BoundingBox").gameObject;
+                return transform.Find("BoundingBoxCollider").gameObject.GetComponent<BoxCollider>();
             }
         }
 
@@ -214,23 +217,64 @@ namespace SMA17Numi
             }
         }
 
+        public override Sprite EncyclopediaImage => VehicleFramework.Assets.SpriteHelper.GetSpriteRaw("assets/NumiDatabank.png");
+     
+
         public override string Description => "Super Manuverability Aircraft 17";
 
         public override string EncyclopediaEntry => "Warning: Following vehicle is not designed nor produced by Alterra.\nIts effectiveness and specifications might not be at the Alterra standards and may pose danger to its user.\nThis technology cannot be fully read due to the difference in Alterra and Verdent corporation’s blueprint systems, but we will try to interpret this blueprint's features as closely as possible and for enhanced user experience it will use Alterra hud.\nAll its weapon systems will be completely removed, due to the structural integration of its gun the aircraft will retain its gun but will be completely disabled and locked.\nFollowing user to-read information is directly provided by Verdent Corporation.\n\nSuperManeuverability Aircraft-17 is a military aircraft produced by Verdent corporation.\nIt is the first aircraft to use air-breathing electric jet engines. These engines use the air passing through and rapidly ionize it, providing a large amount of thrust.\n\nIt possesses an 8-barrel 25mm gun [Weapon was disabled]\nTypically possesses 8 hardpoints [Hardpoints were completely removed]\n\nIt uses traditional gauges and instruments in the cockpit, providing accurate data about the surroundings [those systems were disabled due to integration to the Alterra hud]\n\nIt is powered by two power cells due to the substantial efficiency of the engines."
 ;
 
-        public override int BaseCrushDepth => 1;
+        public override int BaseCrushDepth => 30;
 
-        public override int CrushDepthUpgrade1 => 10;
+        public override int CrushDepthUpgrade1 => 20;
 
         public override int CrushDepthUpgrade2 => 50;
 
-        public override int CrushDepthUpgrade3 => 100;
+        public override int CrushDepthUpgrade3 => 50;
 
-        public override int MaxHealth => 3400;
+        public override int MaxHealth => 1600;
 
         public override int Mass => 5000;
         public override int NumModules => 6;
+
+        public override void Start()
+        {
+            base.Start();
+            SetupMagnetBoots();
+        }
+        public void MyAttach()
+        {
+            collisionModel.SetActive(true);
+            useRigidbody.detectCollisions = true;
+            transform.Find("LandingGear/GearCollider/1").GetComponent<Collider>().enabled = false;
+            transform.Find("BoundingBoxCollider").GetComponent<Collider>().enabled = false;
+        }
+        public void MyDetach()
+        {
+            collisionModel.SetActive(true);
+            useRigidbody.detectCollisions = true;
+            transform.Find("LandingGear/GearCollider/1").GetComponent<Collider>().enabled = true;
+            transform.Find("BoundingBoxCollider").GetComponent<Collider>().enabled = false;
+        }
+        public void SetupMagnetBoots()
+        {
+            var magBoots = gameObject.EnsureComponent<VehicleFramework.VehicleComponents.MagnetBoots>();
+            magBoots.MagnetDistance = 5f;
+            magBoots.recharges = true;
+            magBoots.rechargeRate = 0.1f;
+            magBoots.Attach = MyAttach;
+            magBoots.Detach = MyDetach;
+        }
+        public void Attach()
+        {
+            gameObject.EnsureComponent<VehicleFramework.VehicleComponents.VFArmsManager>().ShowArms(false);
+        }
+        public void Detach()
+        {
+            gameObject.EnsureComponent<VehicleFramework.VehicleComponents.VFArmsManager>().ShowArms(true);
+        }
+
         public override ModVehicleEngine Engine
         {
             get
@@ -251,7 +295,7 @@ namespace SMA17Numi
             }
         }
 
-        protected float _takeoffSpeed = 35f;
+        protected float _takeoffSpeed = 40f;
         public override float takeoffSpeed
         {
             get
@@ -266,7 +310,7 @@ namespace SMA17Numi
         public override void Update()
         {
             base.Update();
-            AircraftLib.FlightManager.CheckLandingGear(this);
+            FlightManager.CheckLandingGear(this);
         }
     }
 }
