@@ -26,7 +26,7 @@ namespace SMA17Numi
             message.ShowMessage(msg, 5);
         }
     }
-    [BepInPlugin("com.royalty.subnautica.Numi.mod", "Numi", "1.0.0")]
+    [BepInPlugin("com.royalty.subnautica.Numi.mod", "Numi", "1.0.5")]
     [BepInDependency("com.mikjaw.subnautica.vehicleframework.mod")]
     [BepInDependency("com.snmodding.nautilus")]
     [BepInDependency("com.Bobasaur.AircraftLib")]
